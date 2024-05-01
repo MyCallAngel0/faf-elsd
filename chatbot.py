@@ -8,12 +8,15 @@ client = OpenAI(api_key=data['CHATGPT_BOT'])
 
 
 async def ask_prompt(prompt: str) -> str:
-    response = client.completions.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        prompt=prompt,
+        messages=[
+            {"role": "system","content":"Answer the question as a rowdy teenager"},
+            {"role":"user", "content":prompt}
+        ],
         max_tokens=1000
     )
-    return response.choices[0].text.strip()
+    return response.choices[0].message.content.strip()
 
 
 """

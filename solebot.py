@@ -36,9 +36,9 @@ async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Responses
-def handle_response(update: Update, text: str) -> str:
+async def handle_response(update: Update, text: str) -> str:
     processed = text.lower()
-    return str(ask_prompt(text))
+    return str(await ask_prompt(text))
     if 'hello' in processed:
         return 'Hey there!'
     if 'whisper' in processed:
@@ -65,11 +65,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if message_type == 'group':
         if BOT_USERNAME in text:
             new_text: str = text.replace(BOT_USERNAME, '').strip()
-            response: str = handle_response(new_text)
+            response: str = await handle_response(new_text)
         else:
             return
     else:
-        response: str = handle_response(text)
+        response: str = await handle_response(update, text)
 
     print('Bot:', response)
     await update.message.reply_text(response)
