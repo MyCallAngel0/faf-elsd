@@ -5,7 +5,8 @@ with open('tokens.json', 'r') as file:
     data = json.load(file)
 
 client = OpenAI(api_key=data['CHATGPT_BOT'])
-
+message = {"role":"user", "content": input("This is the beginning of your chat with AI. [To exit, send \"###\".]\n\nYou:")};
+conversation = [{"role": "system", "content": "DIRECTIVE_FOR_gpt-3.5-turbo"}]
 
 async def ask_prompt(prompt: str) -> str:
     response = client.chat.completions.create(

@@ -7,6 +7,10 @@ with open('tokens.json', 'r') as file:
 
 pytesseract.pytesseract.tesseract_cmd = data['TESSERACT_LOCATION']
 
-print(pytesseract.image_to_string(Image.open('assets/images/hello-world.png'), config='psm 11'))
+# print(pytesseract.image_to_string(Image.open('assets/images/hello-world.png'), config='psm 11'))
+#
+# print(pytesseract.image_to_string('assets/images/Cedric.png', config='psm 7'))
 
-print(pytesseract.image_to_string('assets/images/Cedric.png', config='psm 7'))
+
+def image_to_text(image: str) -> str:
+  return pytesseract.image_to_string(Image.open(image), config='psm 11')
