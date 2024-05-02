@@ -35,7 +35,7 @@ async def convert_command(update: Update, context: CallbackContext):
 
 # Responses
 async def handle_response(update: Update, text: str) -> str:
-    return str(await ask_prompt(text))
+    return str(await ask_prompt(update.message.chat_id, text))
 
 
 async def handle_image(update: Update, context: CallbackContext):
