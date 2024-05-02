@@ -24,39 +24,23 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""
 /start - Starts the bot
 /help - Provides this message
-/itt - Converts image to text
-/ask - Sends the prompt to ChatGPT and replies with its response
-/audio - Converts audio to text [WORK_IN_PROGRESS]
+/convert - Converts image or audio file to text
 """)
 
 
-async def audio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Currently, converting audio to text is not available. Sorry for the inconvenience.")
-
-
-async def itt_command(update: Update, context: CallbackContext) -> None:
-    states[update.message.chat_id] = 'awaiting_image'
-    await update.message.reply_text("Please send an image.", reply_markup=ForceReply(selective=True))
-
-
-async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    states[update.message.chat_id] = 'awaiting_prompt'
-    await update.message.reply_text("Please insert the prompt", reply_markup=ForceReply(selective=True))
+async def convert_command(update: Update, context: CallbackContext):
+    states[update.message.chat_id] = 'awaiting_file'
+    await update.message.reply_text("Please send an image or audio.", reply_markup=ForceReply(selective=True))
 
 
 # Responses
 async def handle_response(update: Update, text: str) -> str:
-    chat_id = update.message.chat_id
-    if chat_id in states and states[chat_id] == 'awaiting_prompt':
-        del states[chat_id]
-        return str(await ask_prompt(text))
-    if 'hello' in text.lower():
-        return "Hello, how can I help you?"
+    return str(await ask_prompt(text))
 
 
 async def handle_image(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    if chat_id not in states or states[chat_id] != 'awaiting_image':
+    if chat_id not in states or states[chat_id] != 'awaiting_file':
         return  # Ignore images if not requested
     photo = update.message.photo[-1]
     photo_file = await context.bot.get_file(photo.file_id)  # Retrieve the file from Telegram servers using the file ID
@@ -85,6 +69,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 
+async def handle_audio(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    if chat_id not in states or states[chat_id] != 'awaiting_file':
+        return  # Ignore images if not requested
+    # audio = update.message.audio[-1]
+    # audio_file = await context.bot.get_file(audio.file_id)  # Retrieve the file from Telegram servers using the file ID
+    # file_bytes = await audio_file.download_as_bytearray()
+    # file_path = "received_image.jpg"
+    # with open(file_path, "wb") as file:
+    #     file.write(file_bytes)
+    del states[chat_id]
+    response = "Converting audio to text is currently not working. Sorry for the inconvenience."
+    print('Bot:', response)
+    await update.message.reply_text(response)
+
+
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} cause error {context.error}')
 
@@ -96,12 +96,13 @@ if __name__ == "__main__":
     # Commands
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command))
-    app.add_handler(CommandHandler('itt', itt_command))
-    app.add_handler(CommandHandler('ask', ask_command))
+    app.add_handler(CommandHandler('convert', convert_command))
 
     # Messages
-    app.add_handler((MessageHandler(filters.TEXT, handle_message)))
+    app.add_handler(MessageHandler(filters.TEXT, handle_message))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
+    app.add_handler(MessageHandler(filters.AUDIO, handle_audio))
+    app.add_handler(MessageHandler(filters.VOICE, handle_audio))
 
     # Errors
     app.add_error_handler(error)
